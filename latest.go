@@ -46,26 +46,28 @@ func fetch(url string) (Package, error) {
   return pkg, nil
 }
 
-func latestRubyGem(name string) (Package, error) {
-  var pkg Package
-
-  pkg, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
+func latestRubyGem(name string) (error) {
+  gem, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
   if err != nil {
-    return pkg, err
+    return err
   }
 
-  return pkg, nil
+  fmt.Println("Gem found:")
+  fmt.Println(gem.Name, gem.Version)
+
+  return nil
 }
 
-func latestNodePackage(name string) (Package, error) {
-  var pkg Package
-
-  pkg, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
+func latestNodePackage(name string) (error) {
+  nodePackage, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
   if err != nil {
-    return pkg, err
+    return err
   }
 
-  return pkg, nil
+  fmt.Println("Node package found:")
+  fmt.Println(nodePackage.Name, nodePackage.Version)
+
+  return nil
 }
 
 func main() {
@@ -90,28 +92,20 @@ func main() {
   }
 
   app.Action = func(context *cli.Context) error {
+    name := context.Args().Get(0)
+
     if isRubyGem {
-      name := context.Args().Get(0)
-
-      gem, err := latestRubyGem(name)
+      err := latestRubyGem(name)
       if err != nil {
         fmt.Println(err)
         os.Exit(1)
       }
-
-      fmt.Println("Gem found:")
-      fmt.Println(gem.Name, gem.Version)
     } else if isNodePackage {
-      name := context.Args().Get(0)
-
-      nodePackage, err := latestNodePackage(name)
+      err := latestNodePackage(name)
       if err != nil {
         fmt.Println(err)
         os.Exit(1)
       }
-
-      fmt.Println("Node package found:")
-      fmt.Println(nodePackage.Name, nodePackage.Version)
     } else {
       fmt.Println("gem")
       fmt.Println("node")

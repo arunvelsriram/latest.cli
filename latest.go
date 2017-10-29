@@ -7,7 +7,7 @@ import (
   "io/ioutil"
   "encoding/json"
   "time"
-  "log"
+  "errors"
 
   "github.com/urfave/cli"
 )
@@ -17,7 +17,7 @@ type Gem struct {
   Version string
 }
 
-func latestRubyGemVersion(gemName string) Gem {
+func latestRubyGemVersion(gemName string) (Gem, error) {
   var gem Gem
   var httpClient = &http.Client{
     Timeout: time.Second * 10,
@@ -26,26 +26,25 @@ func latestRubyGemVersion(gemName string) Gem {
   url := fmt.Sprintf("https://rubygems.org//api/v1/gems/%s.json", gemName)
   resp, err := httpClient.Get(url)
   if err != nil {
-    log.Fatal(err)
+    return gem, errors.New("Failed to fetch gem details")
   }
 
   if(resp.StatusCode == http.StatusNotFound) {
-    return gem
+    return gem, errors.New("Gem not found")
   }
 
   jsonBlob, err := ioutil.ReadAll(resp.Body)
   resp.Body.Close()
   if err != nil {
-    log.Fatal(err)
+    return gem, errors.New("Failed to read gem details")
   }
 
   err = json.Unmarshal(jsonBlob, &gem)
   if err != nil {
-    log.Print(gem)
-    log.Fatal(err)
+    return gem, errors.New("Failed to parse gem details JSON")
   }
 
-  return gem
+  return gem, nil
 }
 
 func main() {
@@ -71,10 +70,16 @@ func main() {
 
   app.Action = func(context *cli.Context) error {
     if queryGem {
-      fmt.Println("gem")
       gemName := context.Args().Get(0)
-      gem := latestRubyGemVersion(gemName)
-      fmt.Printf("%s: %s\n", gem.Name, gem.Version)
+
+      gem, err := latestRubyGemVersion(gemName)
+      if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+      }
+
+      fmt.Println("Gem found:")
+      fmt.Println(gem.Name, gem.Version)
     } else if queryNodePkg {
       fmt.Println("node")
     } else {

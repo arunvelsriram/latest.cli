@@ -58,8 +58,8 @@ func latestRubyGem(name string) (Package, error) {
 }
 
 func main() {
-  var queryGem bool
-  var queryNodePkg bool
+  var isRubyGem bool
+  var isNodePackage bool
 
   app := cli.NewApp()
   app.Name = "latest"
@@ -69,17 +69,17 @@ func main() {
     cli.BoolFlag {
       Name:  "gem, g",
       Usage: "query for latest version of a ruby gem",
-      Destination: &queryGem,
+      Destination: &isRubyGem,
     },
     cli.BoolFlag {
       Name: "node-pkg, n",
       Usage: "query for latest version of a node package",
-      Destination: &queryNodePkg,
+      Destination: &isNodePackage,
     },
   }
 
   app.Action = func(context *cli.Context) error {
-    if queryGem {
+    if isRubyGem {
       gemName := context.Args().Get(0)
 
       gem, err := latestRubyGem(gemName)
@@ -90,7 +90,7 @@ func main() {
 
       fmt.Println("Gem found:")
       fmt.Println(gem.Name, gem.Version)
-    } else if queryNodePkg {
+    } else if isNodePackage {
       fmt.Println("node")
     } else {
       fmt.Println("gem")

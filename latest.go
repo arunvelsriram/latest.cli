@@ -17,41 +17,41 @@ type Package struct {
   Version string
 }
 
-func fetchJSON(url string) ([]byte, error) {
-  var jsonBlob []byte
+func fetch(url string) (Package, error) {
+  var pkg Package
   var httpClient = &http.Client{
     Timeout: time.Second * 10,
   }
 
   resp, err := httpClient.Get(url)
   if err != nil {
-    return jsonBlob, errors.New(fmt.Sprintf("Failed to get response from %s", url))
+    return pkg, errors.New(fmt.Sprintf("Failed to get response from %s", url))
   }
 
   if(resp.StatusCode == http.StatusNotFound) {
-    return jsonBlob, errors.New("Not found")
+    return pkg, errors.New("Not found")
   }
 
-  jsonBlob, err = ioutil.ReadAll(resp.Body)
+  jsonBlob, err := ioutil.ReadAll(resp.Body)
   resp.Body.Close()
   if err != nil {
-    return jsonBlob, errors.New("Failed to read response body")
+    return pkg, errors.New("Failed to read response body")
   }
 
-  return jsonBlob, nil
+  err = json.Unmarshal(jsonBlob, &pkg)
+  if err != nil {
+    return pkg, errors.New("Failed to parse JSON")
+  }
+
+  return pkg, nil
 }
 
 func latestRubyGem(name string) (Package, error) {
   var pkg Package
 
-  jsonBlob, err := fetchJSON(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
+  pkg, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
   if err != nil {
     return pkg, err
-  }
-
-  err = json.Unmarshal(jsonBlob, &pkg)
-  if err != nil {
-    return pkg, errors.New("Failed to parse gem details JSON")
   }
 
   return pkg, nil
@@ -60,14 +60,9 @@ func latestRubyGem(name string) (Package, error) {
 func latestNodePackage(name string) (Package, error) {
   var pkg Package
 
-  jsonBlob, err := fetchJSON(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
+  pkg, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
   if err != nil {
     return pkg, err
-  }
-
-  err = json.Unmarshal(jsonBlob, &pkg)
-  if err != nil {
-    return pkg, errors.New("Failed to parse")
   }
 
   return pkg, nil

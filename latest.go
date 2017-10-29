@@ -7,10 +7,17 @@ import (
   "io/ioutil"
   "encoding/json"
   "time"
-  "errors"
 
   "github.com/urfave/cli"
 )
+
+type NotFoundError struct {
+  Message string
+}
+
+func (error *NotFoundError) Error() (string) {
+  return error.Message
+}
 
 type Package struct {
   Name string
@@ -25,22 +32,22 @@ func fetch(url string) (Package, error) {
 
   resp, err := httpClient.Get(url)
   if err != nil {
-    return pkg, errors.New(fmt.Sprintf("Failed to get response from %s", url))
+    return pkg, fmt.Errorf("Failed to get response from %s", url)
   }
 
   if(resp.StatusCode == http.StatusNotFound) {
-    return pkg, errors.New("Not found")
+    return pkg, &NotFoundError{"Not found"}
   }
 
   jsonBlob, err := ioutil.ReadAll(resp.Body)
   resp.Body.Close()
   if err != nil {
-    return pkg, errors.New("Failed to read response body")
+    return pkg, fmt.Errorf("Failed to read response body")
   }
 
   err = json.Unmarshal(jsonBlob, &pkg)
   if err != nil {
-    return pkg, errors.New("Failed to parse JSON")
+    return pkg, fmt.Errorf("Failed to parse JSON")
   }
 
   return pkg, nil
@@ -70,6 +77,10 @@ func latestNodePackage(name string) (error) {
   return nil
 }
 
+func reportError(err error) {
+  fmt.Fprintln(os.Stderr, err)
+}
+
 func main() {
   var isRubyGem bool
   var isNodePackage bool
@@ -97,14 +108,12 @@ func main() {
     if isRubyGem {
       err := latestRubyGem(name)
       if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
+        reportError(err)
       }
     } else if isNodePackage {
       err := latestNodePackage(name)
       if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
+        reportError(err)
       }
     } else {
       fmt.Println("gem")

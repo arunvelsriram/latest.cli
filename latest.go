@@ -12,39 +12,49 @@ import (
   "github.com/urfave/cli"
 )
 
-type Gem struct {
+type Package struct {
   Name string
   Version string
 }
 
-func latestRubyGemVersion(gemName string) (Gem, error) {
-  var gem Gem
+func fetchJSON(url string) ([]byte, error) {
+  var jsonBlob []byte
   var httpClient = &http.Client{
     Timeout: time.Second * 10,
   }
 
-  url := fmt.Sprintf("https://rubygems.org//api/v1/gems/%s.json", gemName)
   resp, err := httpClient.Get(url)
   if err != nil {
-    return gem, errors.New("Failed to fetch gem details")
+    return jsonBlob, errors.New(fmt.Sprintf("Failed to get response from %s", url))
   }
 
   if(resp.StatusCode == http.StatusNotFound) {
-    return gem, errors.New("Gem not found")
+    return jsonBlob, errors.New("Not found")
   }
 
-  jsonBlob, err := ioutil.ReadAll(resp.Body)
+  jsonBlob, err = ioutil.ReadAll(resp.Body)
   resp.Body.Close()
   if err != nil {
-    return gem, errors.New("Failed to read gem details")
+    return jsonBlob, errors.New("Failed to read response body")
   }
 
-  err = json.Unmarshal(jsonBlob, &gem)
+  return jsonBlob, nil
+}
+
+func latestRubyGem(name string) (Package, error) {
+  var pkg Package
+
+  jsonBlob, err := fetchJSON(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
   if err != nil {
-    return gem, errors.New("Failed to parse gem details JSON")
+    return pkg, err
   }
 
-  return gem, nil
+  err = json.Unmarshal(jsonBlob, &pkg)
+  if err != nil {
+    return pkg, errors.New("Failed to parse gem details JSON")
+  }
+
+  return pkg, nil
 }
 
 func main() {
@@ -72,7 +82,7 @@ func main() {
     if queryGem {
       gemName := context.Args().Get(0)
 
-      gem, err := latestRubyGemVersion(gemName)
+      gem, err := latestRubyGem(gemName)
       if err != nil {
         fmt.Println(err)
         os.Exit(1)

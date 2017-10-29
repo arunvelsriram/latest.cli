@@ -57,6 +57,22 @@ func latestRubyGem(name string) (Package, error) {
   return pkg, nil
 }
 
+func latestNodePackage(name string) (Package, error) {
+  var pkg Package
+
+  jsonBlob, err := fetchJSON(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
+  if err != nil {
+    return pkg, err
+  }
+
+  err = json.Unmarshal(jsonBlob, &pkg)
+  if err != nil {
+    return pkg, errors.New("Failed to parse")
+  }
+
+  return pkg, nil
+}
+
 func main() {
   var isRubyGem bool
   var isNodePackage bool
@@ -80,9 +96,9 @@ func main() {
 
   app.Action = func(context *cli.Context) error {
     if isRubyGem {
-      gemName := context.Args().Get(0)
+      name := context.Args().Get(0)
 
-      gem, err := latestRubyGem(gemName)
+      gem, err := latestRubyGem(name)
       if err != nil {
         fmt.Println(err)
         os.Exit(1)
@@ -91,7 +107,16 @@ func main() {
       fmt.Println("Gem found:")
       fmt.Println(gem.Name, gem.Version)
     } else if isNodePackage {
-      fmt.Println("node")
+      name := context.Args().Get(0)
+
+      nodePackage, err := latestNodePackage(name)
+      if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+      }
+
+      fmt.Println("Node package found:")
+      fmt.Println(nodePackage.Name, nodePackage.Version)
     } else {
       fmt.Println("gem")
       fmt.Println("node")

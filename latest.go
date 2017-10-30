@@ -36,7 +36,7 @@ func fetch(url string) (Package, error) {
   }
 
   if(resp.StatusCode == http.StatusNotFound) {
-    return pkg, &NotFoundError{"Not found"}
+    return pkg, &NotFoundError{"Not found!"}
   }
 
   jsonBlob, err := ioutil.ReadAll(resp.Body)
@@ -54,26 +54,27 @@ func fetch(url string) (Package, error) {
 }
 
 func latestRubyGem(name string) (error) {
+  fmt.Println("Ruby Gem:")
+
   gem, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
   if err != nil {
     return err
   }
 
-  fmt.Println("Gem found:")
   fmt.Println(gem.Name, gem.Version)
 
   return nil
 }
 
 func latestNodePackage(name string) (error) {
+  fmt.Println("Node Module:")
+
   nodePackage, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
   if err != nil {
     return err
   }
 
-  fmt.Println("Node package found:")
   fmt.Println(nodePackage.Name, nodePackage.Version)
-
   return nil
 }
 
@@ -112,6 +113,7 @@ func main() {
 
   app.Action = func(context *cli.Context) error {
     name := context.Args().Get(0)
+    fmt.Println()
 
     if isRubyGem {
       err := latestRubyGem(name)

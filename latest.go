@@ -81,6 +81,14 @@ func reportError(err error) {
   fmt.Fprintln(os.Stderr, err)
 }
 
+func exitStatus(err error) (int) {
+  if _, ok := err.(*NotFoundError); ok {
+    return 0
+  }
+
+  return 1
+}
+
 func main() {
   var isRubyGem bool
   var isNodePackage bool
@@ -109,11 +117,13 @@ func main() {
       err := latestRubyGem(name)
       if err != nil {
         reportError(err)
+        os.Exit(exitStatus(err))
       }
     } else if isNodePackage {
       err := latestNodePackage(name)
       if err != nil {
         reportError(err)
+        os.Exit(exitStatus(err))
       }
     } else {
       fmt.Println("gem")

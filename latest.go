@@ -106,7 +106,7 @@ func main() {
     {
       Name:  "gem",
       Aliases: []string{"g"},
-      Usage: "query for latest version of a ruby gem",
+      Usage: "get latest version of ruby gem <name>",
       ArgsUsage: "<name>",
       Before: func(cliContext *cli.Context) error {
         name = cliContext.Args().Get(0)
@@ -129,7 +129,7 @@ func main() {
     {
       Name: "node-module",
       Aliases: []string{"n"},
-      Usage: "query for latest version of a node module",
+      Usage: "get latest version of node module <name>",
       ArgsUsage: "<name>",
       Before: func(cliContext *cli.Context) error {
         name = cliContext.Args().Get(0)
@@ -149,13 +149,27 @@ func main() {
         return nil
       },
     },
-  }
+    {
+      Name: "all",
+      Aliases: []string{"a"},
+      Usage: "get latest version of <name>",
+      ArgsUsage: "<name>",
+      Before: func(cliContext *cli.Context) error {
+        name = cliContext.Args().Get(0)
+        if ok := isEmpty(name); ok {
+          err := fmt.Errorf("name not given")
+          return cli.NewExitError(err, exitStatus(err))
+        }
 
-  app.Action = func(cliContext *cli.Context) error {
-    fmt.Println("gem")
-    fmt.Println("node")
+        return nil
+      },
+      Action: func(cliContext *cli.Context) error {
+        fmt.Println("gem")
+        fmt.Println("node")
 
-    return nil
+        return nil
+      },
+    },
   }
 
   sort.Sort(cli.CommandsByName(app.Commands))

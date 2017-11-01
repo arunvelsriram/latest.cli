@@ -8,6 +8,7 @@ import (
   "encoding/json"
   "time"
   "sort"
+  "strings"
 
   "github.com/urfave/cli"
 )
@@ -79,6 +80,14 @@ func latestNodeModule(name string) (error) {
   return nil
 }
 
+func isEmpty(content string) bool {
+  if strings.TrimSpace(content) == "" {
+    return true
+  }
+
+  return false
+}
+
 func exitStatus(err error) (int) {
   if _, ok := err.(*NotFoundError); ok {
     return 0
@@ -88,6 +97,7 @@ func exitStatus(err error) (int) {
 }
 
 func main() {
+  var name string
   app := cli.NewApp()
   app.Name = "latest"
   app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
@@ -97,8 +107,17 @@ func main() {
       Name:  "gem",
       Aliases: []string{"g"},
       Usage: "query for latest version of a ruby gem",
+      ArgsUsage: "<name>",
+      Before: func(cliContext *cli.Context) error {
+        name = cliContext.Args().Get(0)
+        if ok := isEmpty(name); ok {
+          err := fmt.Errorf("name not given")
+          return cli.NewExitError(err, exitStatus(err))
+        }
+
+        return nil
+      },
       Action: func(cliContext *cli.Context) error {
-        name := cliContext.Args().Get(0)
         err := latestRubyGem(name)
         if err != nil {
           return cli.NewExitError(err, exitStatus(err))
@@ -111,8 +130,17 @@ func main() {
       Name: "node-module",
       Aliases: []string{"n"},
       Usage: "query for latest version of a node module",
+      ArgsUsage: "<name>",
+      Before: func(cliContext *cli.Context) error {
+        name = cliContext.Args().Get(0)
+        if ok := isEmpty(name); ok {
+          err := fmt.Errorf("name not given")
+          return cli.NewExitError(err, exitStatus(err))
+        }
+
+        return nil
+      },
       Action: func(cliContext *cli.Context) error {
-        name := cliContext.Args().Get(0)
         err := latestNodeModule(name)
         if err != nil {
           return cli.NewExitError(err, exitStatus(err))

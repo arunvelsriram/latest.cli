@@ -7,6 +7,7 @@ import (
   "io/ioutil"
   "encoding/json"
   "time"
+  "sort"
 
   "github.com/urfave/cli"
 )
@@ -128,6 +129,8 @@ func main() {
 
     return nil
   }
+
+  sort.Sort(cli.CommandsByName(app.Commands))
 
   app.Run(os.Args)
 }

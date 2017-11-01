@@ -66,15 +66,15 @@ func latestRubyGem(name string) (error) {
   return nil
 }
 
-func latestNodePackage(name string) (error) {
+func latestNodeModule(name string) (error) {
   fmt.Println("Node Module:")
 
-  nodePackage, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
+  nodeModule, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
   if err != nil {
     return err
   }
 
-  fmt.Println(nodePackage.Name, nodePackage.Version)
+  fmt.Println(nodeModule.Name, nodeModule.Version)
   return nil
 }
 
@@ -92,11 +92,11 @@ func exitStatus(err error) (int) {
 
 func main() {
   var isRubyGem bool
-  var isNodePackage bool
+  var isNodeModule bool
 
   app := cli.NewApp()
   app.Name = "latest"
-  app.Usage = "CLI to find the latest version of a ruby gem, node package etc."
+  app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
 
   app.Flags = []cli.Flag {
     cli.BoolFlag {
@@ -106,8 +106,8 @@ func main() {
     },
     cli.BoolFlag {
       Name: "node-pkg, n",
-      Usage: "query for latest version of a node package",
-      Destination: &isNodePackage,
+      Usage: "query for latest version of a node module",
+      Destination: &isNodeModule,
     },
   }
 
@@ -121,8 +121,8 @@ func main() {
         reportError(err)
         os.Exit(exitStatus(err))
       }
-    } else if isNodePackage {
-      err := latestNodePackage(name)
+    } else if isNodeModule {
+      err := latestNodeModule(name)
       if err != nil {
         reportError(err)
         os.Exit(exitStatus(err))

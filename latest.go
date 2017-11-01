@@ -78,10 +78,6 @@ func latestNodeModule(name string) (error) {
   return nil
 }
 
-func reportError(err error) {
-  fmt.Fprintln(os.Stderr, err)
-}
-
 func exitStatus(err error) (int) {
   if _, ok := err.(*NotFoundError); ok {
     return 0
@@ -91,46 +87,45 @@ func exitStatus(err error) (int) {
 }
 
 func main() {
-  var isRubyGem bool
-  var isNodeModule bool
-
   app := cli.NewApp()
   app.Name = "latest"
   app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
 
-  app.Flags = []cli.Flag {
-    cli.BoolFlag {
-      Name:  "gem, g",
+  app.Commands = []cli.Command {
+    {
+      Name:  "gem",
+      Aliases: []string{"g"},
       Usage: "query for latest version of a ruby gem",
-      Destination: &isRubyGem,
+      Action: func(cliContext *cli.Context) error {
+        name := cliContext.Args().Get(0)
+        err := latestRubyGem(name)
+        if err != nil {
+          return cli.NewExitError(err, exitStatus(err))
+        }
+
+        return nil
+      },
     },
-    cli.BoolFlag {
-      Name: "node-pkg, n",
+    {
+      Name: "node-module",
+      Aliases: []string{"n"},
       Usage: "query for latest version of a node module",
-      Destination: &isNodeModule,
+      Action: func(cliContext *cli.Context) error {
+        name := cliContext.Args().Get(0)
+        err := latestNodeModule(name)
+        if err != nil {
+          return cli.NewExitError(err, exitStatus(err))
+        }
+
+        return nil
+      },
     },
   }
 
-  app.Action = func(context *cli.Context) error {
-    name := context.Args().Get(0)
-    fmt.Println()
+  app.Action = func(cliContext *cli.Context) error {
+    fmt.Println("gem")
+    fmt.Println("node")
 
-    if isRubyGem {
-      err := latestRubyGem(name)
-      if err != nil {
-        reportError(err)
-        os.Exit(exitStatus(err))
-      }
-    } else if isNodeModule {
-      err := latestNodeModule(name)
-      if err != nil {
-        reportError(err)
-        os.Exit(exitStatus(err))
-      }
-    } else {
-      fmt.Println("gem")
-      fmt.Println("node")
-    }
     return nil
   }
 

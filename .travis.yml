@@ -1,7 +1,7 @@
 language: go
 go:
 - 1.9
-after_install:
+before_install:
   - go get -u github.com/golang/lint/golint
 before_script:
   - golint -set_exit_status

@@ -1,8 +1,15 @@
 language: go
 go:
-  - 1.9
+- 1.9
 install:
-  - go get -v github.com/Masterminds/glide
-  - glide install
+- go get -v github.com/Masterminds/glide
+- glide install
 script:
-  - go build -o latest
+- go build -o latest
+deploy:
+  provider: releases
+  api_key:
+    secure: bhs7hC5PbOcoe/Z27GqclC5aUnZZBPXp0ZBsVKTZE/GE85tlvCx/oxmx8IdaXcsn/LJfjWu+iYJ3XfQyVLCeTFVmA3yd+TKSnwUcW3FOaZSxXMhu6ligPnVLLKUo+NAy7KqAoPEUlm4sMl0QGuKSMWJFMU+XFqUNtetg9YJcpvZ8s6TfQlsdXp+qVhtrM6SCWoRmpS+Xcqg9O1Yr98DSkSnWOMdrMcP6QXR25FkC/t+cA9PBIz833UOobYgptKSQI6w+EOSrIxYWG1Um9ARjJVw3oNghnQgRXjN90RY6wybFV6X/BaIsPhs7rfbBjGo/g4hrXnwnT47kKhrrgLjqVDmntpZkXfUA3X5dhTRG3h6tFJ3+r4YSUvR2wTvdY/eeT/SpVoMElbakmJAYt5J7D9iPLhl8rJiBAAe+yRa3HRERmm+NkHNjlTWCg8PLNTLEnmjfizBEkd0T9bJ9LEzpte4WXKIq3WUDQ4ZRJb6C48M/rJPrUeRKZaM9AIkjnSiK/oA6LKQM6OJR3iZL8fW9WJjDCWDzrDfKeOkemLXrh28JcCLzSEteomUw6/4wQGZUxVM+VhSexh8OhI2V+yfOclcOiRFBTluQpoTOtxoKQ6PHRixnmgglzeOH/7AbNv+snkkCfDAO5KhxZlJOaEt1u4e/gEZYqk5hvUWGIjdXjr0=
+  file: latest
+  on:
+    tags: true

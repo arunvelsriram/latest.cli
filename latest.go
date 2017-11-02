@@ -118,6 +118,7 @@ func main() {
   app := cli.NewApp()
   app.Name = "latest"
   app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
+  app.ArgsUsage = "<name>"
 
   before :=  func(cliContext *cli.Context) (error) {
     name := cliContext.Args().Get(0)
@@ -162,27 +163,22 @@ func main() {
         return nil
       },
     },
-    {
-      Name: "all",
-      Aliases: []string{"a"},
-      Usage: "get latest version of <name>",
-      ArgsUsage: "<name>",
-      Before: before,
-      Action: func(cliContext *cli.Context) error {
-        name := cliContext.Args().Get(0)
-        if errs := latestAll(name); errs != nil {
-          var computedExitStatus int
+  }
 
-          for _, err := range errs {
-            computedExitStatus += exitStatus(err)
-          }
+  app.Before = before
+  app.Action = func (cliContext *cli.Context) error {
+    name := cliContext.Args().Get(0)
+    if errs := latestAll(name); errs != nil {
+      var computedExitStatus int
 
-          os.Exit(computedExitStatus)
-        }
+      for _, err := range errs {
+        computedExitStatus += exitStatus(err)
+      }
 
-        return nil
-      },
-    },
+      os.Exit(computedExitStatus)
+    }
+
+    return nil
   }
 
   sort.Sort(cli.CommandsByName(app.Commands))

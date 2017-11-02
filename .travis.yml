@@ -1,9 +1,6 @@
 language: go
 go:
 - 1.9
-install:
-- go get -v github.com/Masterminds/glide
-- glide install
 script:
 - go build -o latest
 deploy:

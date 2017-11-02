@@ -56,6 +56,7 @@ func fetch(url string) (Package, error) {
 }
 
 func latestRubyGem(name string) (error) {
+  fmt.Println()
   fmt.Println("Ruby Gem:")
 
   gem, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
@@ -69,6 +70,7 @@ func latestRubyGem(name string) (error) {
 }
 
 func latestNodeModule(name string) (error) {
+  fmt.Println()
   fmt.Println("Node Module:")
 
   nodeModule, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
@@ -78,6 +80,22 @@ func latestNodeModule(name string) (error) {
 
   fmt.Println(nodeModule.Name, nodeModule.Version)
   return nil
+}
+
+func latestAll(name string) ([]error) {
+  var errs []error
+
+  if err := latestRubyGem(name); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    errs = append(errs, err)
+  }
+
+  if err := latestNodeModule(name); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    errs = append(errs, err)
+  }
+
+  return errs
 }
 
 func isEmpty(content string) bool {
@@ -164,8 +182,15 @@ func main() {
         return nil
       },
       Action: func(cliContext *cli.Context) error {
-        fmt.Println("gem")
-        fmt.Println("node")
+        if errs := latestAll(name); errs != nil {
+          var computedExitStatus int
+
+          for _, err := range errs {
+            computedExitStatus += exitStatus(err)
+          }
+
+          os.Exit(computedExitStatus)
+        }
 
         return nil
       },

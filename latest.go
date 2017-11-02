@@ -28,7 +28,7 @@ type Package struct {
 
 func fetch(url string) (Package, error) {
   var pkg Package
-  var httpClient = &http.Client{
+  httpClient := &http.Client{
     Timeout: time.Second * 10,
   }
 
@@ -115,10 +115,19 @@ func exitStatus(err error) (int) {
 }
 
 func main() {
-  var name string
   app := cli.NewApp()
   app.Name = "latest"
   app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
+
+  before :=  func(cliContext *cli.Context) (error) {
+    name := cliContext.Args().Get(0)
+    if ok := isEmpty(name); ok {
+      err := fmt.Errorf("name not given")
+      return cli.NewExitError(err, exitStatus(err))
+    }
+
+    return nil
+  }
 
   app.Commands = []cli.Command {
     {
@@ -126,16 +135,9 @@ func main() {
       Aliases: []string{"g"},
       Usage: "get latest version of ruby gem <name>",
       ArgsUsage: "<name>",
-      Before: func(cliContext *cli.Context) error {
-        name = cliContext.Args().Get(0)
-        if ok := isEmpty(name); ok {
-          err := fmt.Errorf("name not given")
-          return cli.NewExitError(err, exitStatus(err))
-        }
-
-        return nil
-      },
+      Before: before,
       Action: func(cliContext *cli.Context) error {
+        name := cliContext.Args().Get(0)
         err := latestRubyGem(name)
         if err != nil {
           return cli.NewExitError(err, exitStatus(err))
@@ -149,16 +151,9 @@ func main() {
       Aliases: []string{"n"},
       Usage: "get latest version of node module <name>",
       ArgsUsage: "<name>",
-      Before: func(cliContext *cli.Context) error {
-        name = cliContext.Args().Get(0)
-        if ok := isEmpty(name); ok {
-          err := fmt.Errorf("name not given")
-          return cli.NewExitError(err, exitStatus(err))
-        }
-
-        return nil
-      },
+      Before: before,
       Action: func(cliContext *cli.Context) error {
+        name := cliContext.Args().Get(0)
         err := latestNodeModule(name)
         if err != nil {
           return cli.NewExitError(err, exitStatus(err))
@@ -172,16 +167,9 @@ func main() {
       Aliases: []string{"a"},
       Usage: "get latest version of <name>",
       ArgsUsage: "<name>",
-      Before: func(cliContext *cli.Context) error {
-        name = cliContext.Args().Get(0)
-        if ok := isEmpty(name); ok {
-          err := fmt.Errorf("name not given")
-          return cli.NewExitError(err, exitStatus(err))
-        }
-
-        return nil
-      },
+      Before: before,
       Action: func(cliContext *cli.Context) error {
+        name := cliContext.Args().Get(0)
         if errs := latestAll(name); errs != nil {
           var computedExitStatus int
 

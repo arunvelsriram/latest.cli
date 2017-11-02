@@ -13,6 +13,7 @@ import (
   "github.com/urfave/cli"
 )
 
+// NotFoundError : an error implementation used when a package is not availabe in the source repository
 type NotFoundError struct {
   Message string
 }
@@ -21,6 +22,7 @@ func (error *NotFoundError) Error() (string) {
   return error.Message
 }
 
+// Package : struct representing a package
 type Package struct {
   Name string
   Version string

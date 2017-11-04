@@ -5,4 +5,5 @@ builds:
       - darwin
       - linux
     goarch:
-      - amd64i
+      - amd64
+      - 386

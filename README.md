@@ -6,6 +6,18 @@ A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc.
 
 ## Usage
 
+### Prerequisites
+
+On *Linux* `curl` dependencies are required.
+
+Debian based Linux:
+
+`apt-get install curl`
+
+RPM based Linux:
+
+`yum install curl`
+
 ### Install
 
 #### MacOS and Linux

@@ -1,4 +1,4 @@
-# latest
+# latest.cli
 
 [![Build Status](https://travis-ci.org/arunvelsriram/latest.cli.svg?branch=master)](https://travis-ci.org/arunvelsriram/latest.cli)
 
@@ -10,7 +10,7 @@ A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc.
 
 #### MacOS and Linux
 
-1. Download appropriate tar file from releases page
+1. Download appropriate tar file from [releases](https://github.com/arunvelsriram/latest.cli/releases) page
 2. Extract the tar file
 3. Move the binary to `/usr/local/bin`
 5. Run `latest`

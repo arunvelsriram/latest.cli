@@ -6,7 +6,6 @@ builds:
       - linux
     goarch:
       - amd64
-      - 386
 archive:
   wrap_in_directory: true
   format_overrides:

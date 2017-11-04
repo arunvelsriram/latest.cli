@@ -119,7 +119,7 @@ func exitStatus(err error) (int) {
 func main() {
   app := cli.NewApp()
   app.Name = "latest"
-  app.Version = "v1.0.0"
+  app.Version = "v1.1.0"
   app.Usage = "A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc."
   app.ArgsUsage = "<name>"
 

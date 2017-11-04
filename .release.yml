@@ -1,9 +1,8 @@
 builds:
-  main: ./latest.go
-- binary: latest
-  goos:
-  - windows
-  - darwin
-  - linux
-  goarch:
-  - amd64i
+  - binary: latest
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64i

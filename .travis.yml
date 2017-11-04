@@ -1,10 +1,10 @@
 language: go
 go:
-- 1.9.x
+  - 1.9.x
 before_install:
-- go get -u github.com/golang/lint/golint
+  - go get -u github.com/golang/lint/golint
 before_script:
-- golint -set_exit_status
+  - golint -set_exit_status
 deploy:
   provider: script
   script: deploy.sh

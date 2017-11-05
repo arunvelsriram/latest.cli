@@ -13,12 +13,9 @@ before_deploy:
   - rvm default
   - gem install --no-ri --no-rdoc fpm
   - which fpm
-  - echo $PATH
-  - export PATH=$PATH:$(which fpm)
-  - echo $PATH
 deploy:
   provider: script
-  script: ./deploy.sh
+  script: rvm default do ./deploy.sh
   skip_cleanup: true
   on:
     branch: fix-build

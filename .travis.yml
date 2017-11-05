@@ -10,7 +10,6 @@ before_deploy:
   - sudo apt-get -qq update
   - sudo apt-get install -y rpm
   - which rpm
-  - rvm default
   - gem install --no-ri --no-rdoc fpm
   - which fpm
 deploy:

@@ -2,19 +2,19 @@ language: go
 go:
   - 1.9.x
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y rpm
-  - which rpm
-  - rvm default
-  - gem install --no-ri --no-rdoc fpm
-  - which fpm
   - go get -u github.com/golang/lint/golint
   - which golint
 before_script:
   - golint -set_exit_status
+before_deploy:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y rpm
+  - which rpm
+  - gem install --no-ri --no-rdoc fpm
+  - which fpm
 deploy:
   provider: script
-  script: ./deploy.sh
+  script: rvm default do ./deploy.sh
   skip_cleanup: true
   on:
     tags: true

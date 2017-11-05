@@ -8,6 +8,9 @@ before_install:
   - rvm default
   - gem install --no-ri --no-rdoc fpm
   - which fpm
+  - echo $PATH
+  - export PATH=$PATH:$(which fpm)
+  - echo $PATH
   - go get -u github.com/golang/lint/golint
   - which golint
 before_script:

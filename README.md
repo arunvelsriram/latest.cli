@@ -8,7 +8,7 @@ A CLI to find the latest version of a Ruby Gem, Node module, Java JAR etc.
 
 ### Prerequisites
 
-On *Linux* `curl` dependencies are required.
+On **Linux** `curl` dependencies are required.
 
 Debian based Linux:
 
@@ -33,5 +33,6 @@ Not tested yet! :P
 
 ## TODO
 - [ ] Make latest installable through brew
+- [ ] Support Python packages
 - [ ] Findest latest version of a JAR  
 - [ ] Pass multiple names (eg. `latest rails puma rspec`)

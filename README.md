@@ -41,7 +41,11 @@ Based on your Linux variant download `deb` or `rpm` file from the [latest releas
 
 #### Windows
 
-Not tested yet! :P
+1. Download zip file from the [latest release](https://github.com/arunvelsriram/latest.cli/releases/latest)
+2. Extract the zip file
+3. Open the extracted directory in Command Prompt
+4. Run `latest`
+5. Optinally add `latest.exe` to system path
 
 ## TODO
 - [ ] Make latest installable through brew

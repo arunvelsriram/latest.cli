@@ -13,6 +13,59 @@ import (
   "github.com/urfave/cli"
 )
 
+// Package : struct representing a package
+type Package struct {
+  Name string
+  Version string
+}
+
+// Command : command interface for all latest* command implementations
+type Command interface {
+  Execute() error
+}
+
+// LatestGem : LatestGem command
+type LatestGem struct {
+  repo string
+  name string
+}
+
+// Execute : gets latest version of gem
+func (latestGem LatestGem) Execute() (error) {
+  fmt.Println()
+  fmt.Println("Ruby Gem:")
+
+  pkg, err := getPackage( fmt.Sprintf("%s/%s.json", latestGem.repo, latestGem.name))
+  if err != nil {
+    return err
+  }
+
+  fmt.Println(pkg.Name, pkg.Version)
+
+  return nil
+}
+
+// LatestNodeModule : LatestNodeModule command
+type LatestNodeModule struct {
+  repo string
+  name string
+}
+
+// Execute : gets latest version of node module
+func (latestNodeModule LatestNodeModule) Execute() (error) {
+  fmt.Println()
+  fmt.Println("Node Module:")
+
+  pkg, err := getPackage(fmt.Sprintf("%s/%s/latest", latestNodeModule.repo, latestNodeModule.name))
+  if err != nil {
+    return err
+  }
+
+  fmt.Println(pkg.Name, pkg.Version)
+
+  return nil
+}
+
 // NotFoundError : an error implementation used when a package is not availabe in the source repository
 type NotFoundError struct {
   Message string
@@ -22,13 +75,8 @@ func (error *NotFoundError) Error() (string) {
   return error.Message
 }
 
-// Package : struct representing a package
-type Package struct {
-  Name string
-  Version string
-}
 
-func fetch(url string) (Package, error) {
+func getPackage(url string) (Package, error) {
   var pkg Package
   httpClient := &http.Client{
     Timeout: time.Second * 10,
@@ -57,47 +105,12 @@ func fetch(url string) (Package, error) {
   return pkg, nil
 }
 
-func latestRubyGem(name string) (error) {
-  fmt.Println()
-  fmt.Println("Ruby Gem:")
-
-  gem, err := fetch(fmt.Sprintf("https://rubygems.org/api/v1/gems/%s.json", name))
-  if err != nil {
-    return err
-  }
-
-  fmt.Println(gem.Name, gem.Version)
-
-  return nil
+func latestGemCommand(gemName string) (LatestGem) {
+  return LatestGem{"https://rubygems.org/api/v1/gems", gemName}
 }
 
-func latestNodeModule(name string) (error) {
-  fmt.Println()
-  fmt.Println("Node Module:")
-
-  nodeModule, err := fetch(fmt.Sprintf("https://registry.npmjs.org/%s/latest", name))
-  if err != nil {
-    return err
-  }
-
-  fmt.Println(nodeModule.Name, nodeModule.Version)
-  return nil
-}
-
-func latestAll(name string) ([]error) {
-  var errs []error
-
-  if err := latestRubyGem(name); err != nil {
-    fmt.Fprintln(os.Stderr, err)
-    errs = append(errs, err)
-  }
-
-  if err := latestNodeModule(name); err != nil {
-    fmt.Fprintln(os.Stderr, err)
-    errs = append(errs, err)
-  }
-
-  return errs
+func latestNodeModuleCommand(nodeModuleName string) (LatestNodeModule) {
+  return LatestNodeModule{"https://registry.npmjs.org", nodeModuleName}
 }
 
 func isEmpty(content string) bool {
@@ -141,11 +154,11 @@ func main() {
       ArgsUsage: "<name>",
       Before: before,
       Action: func(cliContext *cli.Context) error {
-        name := cliContext.Args().Get(0)
-        err := latestRubyGem(name)
-        if err != nil {
-          return cli.NewExitError(err, exitStatus(err))
-        }
+       name := cliContext.Args().Get(0)
+       command := latestGemCommand(name)
+       if err := command.Execute(); err != nil {
+         return cli.NewExitError(err, exitStatus(err))
+       }
 
         return nil
       },
@@ -158,8 +171,8 @@ func main() {
       Before: before,
       Action: func(cliContext *cli.Context) error {
         name := cliContext.Args().Get(0)
-        err := latestNodeModule(name)
-        if err != nil {
+        command := latestNodeModuleCommand(name)
+        if err := command.Execute(); err != nil {
           return cli.NewExitError(err, exitStatus(err))
         }
 
@@ -170,17 +183,24 @@ func main() {
 
   app.Before = before
   app.Action = func (cliContext *cli.Context) error {
+    var errs []error
+    computedExitStatus := 0
     name := cliContext.Args().Get(0)
-    if errs := latestAll(name); errs != nil {
-      var computedExitStatus int
+    commands := []Command{latestGemCommand(name), latestNodeModuleCommand(name)}
 
-      for _, err := range errs {
-        computedExitStatus += exitStatus(err)
+    for _, command := range commands {
+      if err := command.Execute(); err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        errs = append(errs, err)
       }
-
-      os.Exit(computedExitStatus)
     }
 
+    for _, err := range errs {
+      computedExitStatus += exitStatus(err)
+    }
+
+    os.Exit(computedExitStatus) 
+    
     return nil
   }
 

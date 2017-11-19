@@ -18,7 +18,13 @@ On **Linux** `curl` dependencies are required.
 
 `yum install curl`
 
-### Install
+### Install using Go
+
+```
+go get github.com/arunvelsriram/latest.cli/latest
+```
+
+### Install from releases
 
 #### Linux
 

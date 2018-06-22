@@ -23,6 +23,9 @@ ifeq ($(RICHGO),)
 	$(GOBIN) get -u github.com/kyoh86/richgo
 endif
 
+build-deps:
+	dep ensure -v
+
 test: ensure-out-dir
 	ENVIRONMENT=test $(GOBIN) test $(SRC_PACKAGES) -coverprofile ./out/coverage -v
 

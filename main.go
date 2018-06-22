@@ -14,8 +14,12 @@
 
 package main
 
-import "github.com/arunvelsriram/latest.cli/cmd"
+import (
+	"github.com/arunvelsriram/latest.cli/cmd"
+	"github.com/arunvelsriram/latest.cli/pkg/config"
+)
 
 func main() {
+	config.SetVersion(0, 0, 1)
 	cmd.Execute()
 }

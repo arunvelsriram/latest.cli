@@ -9,14 +9,14 @@ import (
 	"github.com/arunvelsriram/latest.cli/pkg/common"
 )
 
-// Registry exposes methods to talk to the node registry
-type Registry struct {
+// NPMRegistry exposes methods to talk to the npm registry
+type NPMRegistry struct {
 	url    string
 	client common.HTTPClient
 }
 
 // LatestVersion gets the latest version of a node module
-func (r *Registry) LatestVersion(nodeModule string) (string, error) {
+func (r *NPMRegistry) LatestVersion(nodeModule string) (string, error) {
 	var data map[string]interface{}
 	var latestVersion string
 
@@ -48,7 +48,7 @@ func (r *Registry) LatestVersion(nodeModule string) (string, error) {
 	return latestVersion, nil
 }
 
-// NewRegistry gives a new node registry
-func NewRegistry(url string, client common.HTTPClient) *Registry {
-	return &Registry{url: url, client: client}
+// NewNPMRegistry gives a new NPMRegistry
+func NewNPMRegistry(url string, client common.HTTPClient) *NPMRegistry {
+	return &NPMRegistry{url: url, client: client}
 }

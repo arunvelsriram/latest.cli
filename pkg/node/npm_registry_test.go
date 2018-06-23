@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewNodeRegistry(t *testing.T) {
-	registry := node.NewRegistry("https://registry.npmjs.org", &mock.HTTPClient{})
+func TestNewNPMRegistry(t *testing.T) {
+	registry := node.NewNPMRegistry("https://registry.npmjs.org", &mock.HTTPClient{})
 
 	assert.NotNil(t, registry)
 }
@@ -33,7 +33,7 @@ func TestLatestVersion(t *testing.T) {
 
 		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
 	})
-	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
+	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
@@ -53,7 +53,7 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 
 		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
 	})
-	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
+	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
@@ -72,7 +72,7 @@ func TestLatestVersionErrorMakingHTTPRequest(t *testing.T) {
 
 		return nil, errors.New("Some error")
 	})
-	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
+	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
@@ -89,7 +89,7 @@ func TestLatestVersionResponseResponseStatusNotOK(t *testing.T) {
 
 		return &http.Response{StatusCode: http.StatusInternalServerError}, nil
 	})
-	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
+	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 

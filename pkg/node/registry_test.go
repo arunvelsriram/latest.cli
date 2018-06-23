@@ -62,7 +62,7 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 	assert.Empty(t, actualVersion)
 }
 
-func TestLatestVersionErrorResponse(t *testing.T) {
+func TestLatestVersionErrorMakingHTTPRequest(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockHTTPClient := mock.NewHTTPClient(ctrl)

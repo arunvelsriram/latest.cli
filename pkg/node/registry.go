@@ -31,6 +31,10 @@ func (r *Registry) LatestVersion(nodeModule string) (string, error) {
 		return latestVersion, err
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return latestVersion, fmt.Errorf("Unable to fetch details for %s, StatusCode: %d", nodeModule, res.StatusCode)
+	}
+
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(res.Body)
 	if err := json.Unmarshal(buf.Bytes(), &data); err != nil {

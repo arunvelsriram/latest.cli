@@ -31,7 +31,7 @@ func TestLatestVersion(t *testing.T) {
 		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
 		assert.Equal(t, http.MethodGet, req.Method)
 
-		return &http.Response{Body: mockResponseData}, nil
+		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
 	})
 	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
 
@@ -51,7 +51,7 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
 		assert.Equal(t, http.MethodGet, req.Method)
 
-		return &http.Response{Body: mockResponseData}, nil
+		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
 	})
 	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
 
@@ -77,5 +77,23 @@ func TestLatestVersionErrorMakingHTTPRequest(t *testing.T) {
 	actualVersion, err := registry.LatestVersion("npm")
 
 	assert.NotNil(t, err)
+	assert.Empty(t, actualVersion)
+}
+func TestLatestVersionResponseResponseStatusNotOK(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockHTTPClient := mock.NewHTTPClient(ctrl)
+	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
+		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
+		assert.Equal(t, http.MethodGet, req.Method)
+
+		return &http.Response{StatusCode: http.StatusInternalServerError}, nil
+	})
+	registry := node.NewRegistry("http://registry-base-url", mockHTTPClient)
+
+	actualVersion, err := registry.LatestVersion("npm")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "Unable to fetch details for npm, StatusCode: 500")
 	assert.Empty(t, actualVersion)
 }

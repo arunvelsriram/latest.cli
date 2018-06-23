@@ -46,7 +46,7 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 	defer ctrl.Finish()
 	mockHTTPClient := mock.NewHTTPClient(ctrl)
 	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`{"key": "value"`)))
+		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`{"key": "value"}`)))
 
 		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
 		assert.Equal(t, http.MethodGet, req.Method)
@@ -58,6 +58,7 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 	actualVersion, err := registry.LatestVersion("npm")
 
 	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "Unable to get version from response data")
 	assert.Empty(t, actualVersion)
 }
 

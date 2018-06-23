@@ -3,7 +3,6 @@ package node
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -39,7 +38,7 @@ func (r *Registry) LatestVersion(nodeModule string) (string, error) {
 	}
 
 	if _, ok := data["version"]; !ok {
-		return latestVersion, errors.New("failed to get version from response")
+		return latestVersion, fmt.Errorf("Unable to get version from response data")
 	}
 	latestVersion = data["version"].(string)
 	return latestVersion, nil

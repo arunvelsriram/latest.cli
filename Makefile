@@ -1,3 +1,6 @@
+.PHONY: all
+all: setup build-deps test fmt vet lint build
+
 APP=latest
 VERSION?=1.0
 BUILD?=$(shell git rev-parse --short HEAD)
@@ -49,4 +52,3 @@ vet:
 build: ensure-out-dir
 	$(GOBIN) build -ldflags "-X main.majorVersion=$(VERSION) -X main.minorVersion=${BUILD}" -o $(APP_EXECUTABLE) ./main.go
 
-all: setup build-deps test fmt vet lint build

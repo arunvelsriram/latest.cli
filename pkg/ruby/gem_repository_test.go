@@ -1,10 +1,7 @@
 package ruby_test
 
 import (
-	"bytes"
-	"errors"
-	"io/ioutil"
-	"net/http"
+	"fmt"
 	"testing"
 
 	"github.com/arunvelsriram/latest.cli/pkg/internal/mock"
@@ -14,46 +11,32 @@ import (
 )
 
 func TestNewGemRepository(t *testing.T) {
-	repo := ruby.NewGemRepository("https://repo-api-url", &mock.HTTPClient{})
+	repo := ruby.NewGemRepository("https://api-url", &mock.JSONAPIClient{})
 
 	assert.NotNil(t, repo)
 }
 
-func TestGemLatestVersion(t *testing.T) {
+func TestLatestVersion(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`
-			{"version": "5.2.0", "name": "rails"}`,
-		)))
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockData := map[string]interface{}{"name": "rails", "version": "5.2.0"}
+	mockClient.EXPECT().GetJSON("http://api-url/rails.json").Return(mockData, nil)
+	repo := ruby.NewGemRepository("http://api-url", mockClient)
 
-		assert.Equal(t, "http://repo-api-url/rails.json", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
-	})
-	registry := ruby.NewGemRepository("http://repo-api-url", mockHTTPClient)
-
-	actualVersion, err := registry.LatestVersion("rails")
+	actualVersion, err := repo.LatestVersion("rails")
 
 	assert.Nil(t, err)
 	assert.Equal(t, "5.2.0", actualVersion)
 }
 
-func TestGemLatestVersionWrongResponseData(t *testing.T) {
+func TestLatestVersionShouldReturnErrorIfVersionNotFoundInJSON(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`{"key": "value"}`)))
-
-		assert.Equal(t, "http://repo-api-url/rails.json", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
-	})
-	repo := ruby.NewGemRepository("http://repo-api-url", mockHTTPClient)
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockData := map[string]interface{}{"name": "rails"}
+	mockClient.EXPECT().GetJSON("http://api-url/rails.json").Return(mockData, nil)
+	repo := ruby.NewGemRepository("http://api-url", mockClient)
 
 	actualVersion, err := repo.LatestVersion("rails")
 
@@ -62,38 +45,16 @@ func TestGemLatestVersionWrongResponseData(t *testing.T) {
 	assert.Empty(t, actualVersion)
 }
 
-func TestGemLatestVersionErrorMakingHTTPRequest(t *testing.T) {
+func TestShouldReturnErrorIfGetJSONThrowsError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		assert.Equal(t, "http://repo-api-url/rails.json", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return nil, errors.New("Some error")
-	})
-	repo := ruby.NewGemRepository("http://repo-api-url", mockHTTPClient)
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockClient.EXPECT().GetJSON("http://api-url/rails.json").Return(nil, fmt.Errorf("Some error"))
+	repo := ruby.NewGemRepository("http://api-url", mockClient)
 
 	actualVersion, err := repo.LatestVersion("rails")
 
 	assert.NotNil(t, err)
-	assert.Empty(t, actualVersion)
-}
-func TestGemLatestVersionResponseResponseStatusNotOK(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		assert.Equal(t, "http://repo-api-url/rails.json", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{StatusCode: http.StatusInternalServerError}, nil
-	})
-	registry := ruby.NewGemRepository("http://repo-api-url", mockHTTPClient)
-
-	actualVersion, err := registry.LatestVersion("rails")
-
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "Unable to fetch details for rails, StatusCode: 500")
+	assert.Equal(t, err.Error(), "Some error")
 	assert.Empty(t, actualVersion)
 }

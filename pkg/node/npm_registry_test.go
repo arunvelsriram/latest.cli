@@ -1,10 +1,7 @@
 package node_test
 
 import (
-	"bytes"
-	"errors"
-	"io/ioutil"
-	"net/http"
+	"fmt"
 	"testing"
 
 	"github.com/arunvelsriram/latest.cli/pkg/internal/mock"
@@ -14,7 +11,7 @@ import (
 )
 
 func TestNewNPMRegistry(t *testing.T) {
-	registry := node.NewNPMRegistry("https://registry-base-url", &mock.HTTPClient{})
+	registry := node.NewNPMRegistry("https://registry-base-url", &mock.JSONAPIClient{})
 
 	assert.NotNil(t, registry)
 }
@@ -22,18 +19,10 @@ func TestNewNPMRegistry(t *testing.T) {
 func TestLatestVersion(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`
-			{"version": "6.1.0", "name": "npm", "description": "a package manager for JavaScript"}`,
-		)))
-
-		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
-	})
-	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockData := map[string]interface{}{"name": "npm", "version": "6.1.0"}
+	mockClient.EXPECT().GetJSON("http://api-url/npm/latest").Return(mockData, nil)
+	registry := node.NewNPMRegistry("http://api-url", mockClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
@@ -41,19 +30,13 @@ func TestLatestVersion(t *testing.T) {
 	assert.Equal(t, "6.1.0", actualVersion)
 }
 
-func TestLatestVersionWrongResponseData(t *testing.T) {
+func TestLatestShouldReturnErronIfVersionNotFoundInJSON(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		mockResponseData := ioutil.NopCloser(bytes.NewReader([]byte(`{"key": "value"}`)))
-
-		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
-	})
-	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockData := map[string]interface{}{"name": "npm"}
+	mockClient.EXPECT().GetJSON("http://api-url/npm/latest").Return(mockData, nil)
+	registry := node.NewNPMRegistry("http://api-url", mockClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
@@ -62,38 +45,16 @@ func TestLatestVersionWrongResponseData(t *testing.T) {
 	assert.Empty(t, actualVersion)
 }
 
-func TestLatestVersionErrorMakingHTTPRequest(t *testing.T) {
+func TestShouldReturnErrorIfGetJSONThrowsError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return nil, errors.New("Some error")
-	})
-	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
+	mockClient := mock.NewJSONAPIClient(ctrl)
+	mockClient.EXPECT().GetJSON("http://api-url/npm/latest").Return(nil, fmt.Errorf("Some error"))
+	registry := node.NewNPMRegistry("http://api-url", mockClient)
 
 	actualVersion, err := registry.LatestVersion("npm")
 
 	assert.NotNil(t, err)
-	assert.Empty(t, actualVersion)
-}
-func TestLatestVersionResponseResponseStatusNotOK(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockHTTPClient := mock.NewHTTPClient(ctrl)
-	mockHTTPClient.EXPECT().Do(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-		assert.Equal(t, "http://registry-base-url/npm/latest", req.URL.String())
-		assert.Equal(t, http.MethodGet, req.Method)
-
-		return &http.Response{StatusCode: http.StatusInternalServerError}, nil
-	})
-	registry := node.NewNPMRegistry("http://registry-base-url", mockHTTPClient)
-
-	actualVersion, err := registry.LatestVersion("npm")
-
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "Unable to fetch details for npm, StatusCode: 500")
+	assert.Equal(t, err.Error(), "Some error")
 	assert.Empty(t, actualVersion)
 }

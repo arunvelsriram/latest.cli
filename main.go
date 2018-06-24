@@ -19,10 +19,9 @@ import (
 	"github.com/arunvelsriram/latest.cli/pkg/config"
 )
 
-var majorVersion string
-var minorVersion string
+var version string
 
 func main() {
-	config.SetVersion(majorVersion, minorVersion)
+	config.SetVersion(version)
 	cmd.Execute()
 }

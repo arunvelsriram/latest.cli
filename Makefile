@@ -1,3 +1,5 @@
+APP=latest
+APP_EXECUTABLE="./out/$(APP)"
 SRC_PACKAGES=$(shell go list ./... | grep -v "vendor" | grep -v "latest.cli/latest")
 DEP:=$(shell command -v dep 2> /dev/null)
 GOLINT:=$(shell command -v golint 2> /dev/null)
@@ -38,3 +40,11 @@ lint:
 
 fmt:
 	$(GOBIN) fmt $(SRC_PACKAGES)
+
+vet:
+	$(GOBIN) vet $(SRC_PACKAGES)
+
+build: ensure-out-dir
+	$(GOBIN) build -o $(APP_EXECUTABLE) ./main.go
+
+all: setup build-deps test fmt vet lint build

@@ -2,18 +2,16 @@ package config
 
 import "fmt"
 
-var majorVersion = 0
-var minorVersion = 0
-var patchVersion = 1
+var majorVersion = "1.0"
+var minorVersion = "dev"
 
 // GetVersion gets current app version
 func GetVersion() string {
-	return fmt.Sprintf("%d.%d.%d", majorVersion, minorVersion, patchVersion)
+	return fmt.Sprintf("%s.%s", majorVersion, minorVersion)
 }
 
 // SetVersion sets the current app version
-func SetVersion(major int, minor int, patch int) {
+func SetVersion(major string, minor string) {
 	majorVersion = major
 	minorVersion = minor
-	patchVersion = patch
 }

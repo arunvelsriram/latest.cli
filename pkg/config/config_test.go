@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetDefaultVersion(t *testing.T) {
-	expectedVersion := "0.0.1"
+	expectedVersion := "1.0.dev"
 
 	actualVersion := config.GetVersion()
 
@@ -16,8 +16,8 @@ func TestGetDefaultVersion(t *testing.T) {
 }
 
 func TestGetVersion(t *testing.T) {
-	config.SetVersion(1, 2, 3)
-	expectedVersion := "1.2.3"
+	config.SetVersion("1.2", "a1b2c3")
+	expectedVersion := "1.2.a1b2c3"
 
 	actualVersion := config.GetVersion()
 

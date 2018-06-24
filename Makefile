@@ -1,4 +1,6 @@
 APP=latest
+VERSION?=1.0
+BUILD?=$(shell git rev-parse --short HEAD)
 APP_EXECUTABLE="./out/$(APP)"
 SRC_PACKAGES=$(shell go list ./... | grep -v "vendor" | grep -v "latest.cli/latest")
 DEP:=$(shell command -v dep 2> /dev/null)
@@ -45,6 +47,6 @@ vet:
 	$(GOBIN) vet $(SRC_PACKAGES)
 
 build: ensure-out-dir
-	$(GOBIN) build -o $(APP_EXECUTABLE) ./main.go
+	$(GOBIN) build -ldflags "-X main.majorVersion=$(VERSION) -X main.minorVersion=${BUILD}" -o $(APP_EXECUTABLE) ./main.go
 
 all: setup build-deps test fmt vet lint build

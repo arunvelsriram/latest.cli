@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-// Repository contains method to fetch data from any repository
-type Repository struct {
+// PkgRegistryClient contains method to fetch data from any package registry
+type PkgRegistryClient struct {
 	client HTTPClient
 }
 
 // GetJSON fetches JSON data from the given URL
-func (r *Repository) GetJSON(url string) (map[string]interface{}, error) {
+func (c *PkgRegistryClient) GetJSON(url string) (map[string]interface{}, error) {
 	var data map[string]interface{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -21,7 +21,7 @@ func (r *Repository) GetJSON(url string) (map[string]interface{}, error) {
 		return data, err
 	}
 
-	res, err := r.client.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return data, err
 	}
@@ -39,7 +39,7 @@ func (r *Repository) GetJSON(url string) (map[string]interface{}, error) {
 	return data, nil
 }
 
-// NewRepository returns a new Repository
-func NewRepository(client HTTPClient) *Repository {
-	return &Repository{client: client}
+// NewPkgRegistryClient returns a new PkgRegistryClient
+func NewPkgRegistryClient(client HTTPClient) *PkgRegistryClient {
+	return &PkgRegistryClient{client: client}
 }

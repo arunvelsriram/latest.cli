@@ -17,7 +17,7 @@ var rubyCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
-		client := common.NewRepository(&http.Client{})
+		client := common.NewPkgRegistryClient(&http.Client{})
 		repo := ruby.NewGemRepository("https://rubygems.org/api/v1/gems", client)
 		version, err := repo.LatestVersion(name)
 		if err != nil {

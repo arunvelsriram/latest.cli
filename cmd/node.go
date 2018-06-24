@@ -17,7 +17,7 @@ var nodeCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
-		client := common.NewRepository(&http.Client{})
+		client := common.NewPkgRegistryClient(&http.Client{})
 		registry := node.NewNPMRegistry("https://registry.npmjs.org", client)
 		version, err := registry.LatestVersion(name)
 		if err != nil {

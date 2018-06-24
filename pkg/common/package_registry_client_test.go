@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewRepository(t *testing.T) {
-	repo := common.NewRepository(&mock.HTTPClient{})
+func TestNewPkgRegistryClient(t *testing.T) {
+	repo := common.NewPkgRegistryClient(&mock.HTTPClient{})
 
 	assert.NotNil(t, repo)
 }
@@ -32,7 +32,7 @@ func TestGetJSON(t *testing.T) {
 		return &http.Response{Body: mockResponseData, StatusCode: http.StatusOK}, nil
 	})
 	expectedData := map[string]interface{}{"name": "rails"}
-	repo := common.NewRepository(mockHTTPClient)
+	repo := common.NewPkgRegistryClient(mockHTTPClient)
 
 	actualData, err := repo.GetJSON("https://api-url")
 
@@ -50,7 +50,7 @@ func TestGetJSONShouldReturnErrorWhenHTTPRequestFails(t *testing.T) {
 
 		return nil, fmt.Errorf("Some error")
 	})
-	repo := common.NewRepository(mockHTTPClient)
+	repo := common.NewPkgRegistryClient(mockHTTPClient)
 
 	data, err := repo.GetJSON("https://api-url")
 
@@ -69,7 +69,7 @@ func TestGetJSONShouldReturnErrorWhenHTTPResponseStatusIsNotOK(t *testing.T) {
 
 		return &http.Response{StatusCode: http.StatusInternalServerError}, nil
 	})
-	repo := common.NewRepository(mockHTTPClient)
+	repo := common.NewPkgRegistryClient(mockHTTPClient)
 
 	data, err := repo.GetJSON("https://api-url")
 
@@ -90,7 +90,7 @@ func TestGetJSONShouldReturnErrorForInvalidJSON(t *testing.T) {
 
 		return &http.Response{StatusCode: http.StatusOK, Body: mockResponseData}, nil
 	})
-	repo := common.NewRepository(mockHTTPClient)
+	repo := common.NewPkgRegistryClient(mockHTTPClient)
 
 	data, err := repo.GetJSON("https://api-url")
 

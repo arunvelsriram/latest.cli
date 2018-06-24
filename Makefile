@@ -3,7 +3,7 @@ all: setup build-deps test fmt vet lint build
 
 APP=latest
 VERSION?=$(shell git describe --tags --always --dirty)
-APP_EXECUTABLE="./out/$(APP)"
+APP_EXECUTABLE?="./out/$(APP)"
 SRC_PACKAGES=$(shell go list ./... | grep -v "vendor" | grep -v "latest.cli/latest")
 DEP:=$(shell command -v dep 2> /dev/null)
 GOLINT:=$(shell command -v golint 2> /dev/null)

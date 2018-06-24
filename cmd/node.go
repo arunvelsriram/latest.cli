@@ -10,14 +10,14 @@ import (
 )
 
 var nodeCmd = &cobra.Command{
-	Use:     "node <node-module>",
+	Use:     "node <module-name>",
 	Short:   "Get latest version of a node module",
 	Aliases: []string{"n"},
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		nodeModule := args[0]
+		name := args[0]
 		registry := node.NewNPMRegistry("https://registry.npmjs.org", &http.Client{})
-		version, err := registry.LatestVersion(nodeModule)
+		version, err := registry.LatestVersion(name)
 		if err != nil {
 			log.Fatal(err)
 		}

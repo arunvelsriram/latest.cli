@@ -14,7 +14,7 @@ import (
 )
 
 func TestNewNPMRegistry(t *testing.T) {
-	registry := node.NewNPMRegistry("https://registry.npmjs.org", &mock.HTTPClient{})
+	registry := node.NewNPMRegistry("https://registry-base-url", &mock.HTTPClient{})
 
 	assert.NotNil(t, registry)
 }

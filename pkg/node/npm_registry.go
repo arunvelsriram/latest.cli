@@ -16,11 +16,11 @@ type NPMRegistry struct {
 }
 
 // LatestVersion gets the latest version of a node module
-func (r *NPMRegistry) LatestVersion(nodeModule string) (string, error) {
+func (r *NPMRegistry) LatestVersion(name string) (string, error) {
 	var data map[string]interface{}
 	var latestVersion string
 
-	uri := fmt.Sprintf("%s/%s/latest", r.url, nodeModule)
+	uri := fmt.Sprintf("%s/%s/latest", r.url, name)
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return latestVersion, err
@@ -32,7 +32,7 @@ func (r *NPMRegistry) LatestVersion(nodeModule string) (string, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return latestVersion, fmt.Errorf("Unable to fetch details for %s, StatusCode: %d", nodeModule, res.StatusCode)
+		return latestVersion, fmt.Errorf("Unable to fetch details for %s, StatusCode: %d", name, res.StatusCode)
 	}
 
 	buf := new(bytes.Buffer)
